@@ -1,0 +1,43 @@
+// distinctUntilKeyChanged<T, K extends keyof T>(
+//        key: K, 
+//        compare?: (x: T[K], y: T[K]) => boolean
+// ): MonoTypeOperatorFunction<T>
+
+import { of } from 'rxjs';
+import { distinctUntilKeyChanged } from 'rxjs/operators';
+import { run } from './../03-utils/run';
+
+interface Person {
+  name: string;
+  age: number;
+}
+
+export function distinctUntilKeyChangedDemo1() {
+  const source$ = of<Person>(
+    { name: 'Anna', age: 4 },
+    { name: 'Boris', age: 7 },
+    { name: 'Anna', age: 5 },
+    { name: 'Anna', age: 6 } // <-- dropped this object by name value
+  );
+
+  const prop = 'name';
+  const stream$ = source$.pipe(distinctUntilKeyChanged(prop));
+
+  // run(stream$);
+}
+
+export function distinctUntilKeyChangedDemo2() {
+  const source$ = of<Person>(
+    { name: 'Anna', age: 14 },
+    { name: 'Boris', age: 17 },
+    { name: 'Anna', age: 15 },
+    { name: 'Ann', age: 16 } // <-- dropped this object
+  );
+
+  const prop = 'name';
+  // compare only first 3 letters
+  const compare = (x: string, y: string) => x.substring(0, 3) === y.substring(0, 3);
+  const stream$ = source$.pipe(distinctUntilKeyChanged(prop, compare));
+
+  // run(stream$);
+}
