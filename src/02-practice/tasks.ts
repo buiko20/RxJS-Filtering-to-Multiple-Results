@@ -372,5 +372,51 @@ import { ajax } from 'rxjs/ajax';
     run(stream$, { outputMethod: 'console' });
 })();
 
+// HomeTask 1. debounceTime()
+// Пользователь очень активно кликает на кнопку runBtn, чтобы получить спиок логинов пользователей (https://api.github.com/users?per_page=5).
+// Сделайте так, чтобы только 1 запрос за пользователями был отправлен и выведите список логинов.
+(function homeTask1() {
+    const stream$ = fromEvent(document.getElementById("runBtn"), "click")
+        .pipe(
+            debounceTime(300),
+            switchMap(() => ajax(`https://api.github.com/users?per_page=5`)),
+            switchMap(r => from(r.response)),
+            map((u: any) => u.login)
+        );
+
+    //run(stream$);
+})();
+
+// HomeTask 2. takeWhile()
+// Создайте поток ввода текста из поля ввода до тех пора, пока не будет нажата клавиша Enter.
+// Затем выведете набранную строку.
+(function homeTask2() {
+    const stream$ = fromEvent(document.getElementById("text-field"), "keyup")
+        .pipe(
+            map((e: KeyboardEvent) => e.key),
+            takeWhile(key => key !== "Enter"),
+            toArray(),
+            switchMap(d => from(d)),
+            reduce((acc, value) => `${acc}${value}`, "")
+        );
+
+    //run(stream$);
+})();
+
+// HomeTask 3. skip() take()
+// Создайте поток ajax(`https://api.github.com/users`)
+// Вывидите логины 10го, 11го, 12го, 13го, 14го по порядку пользователей.
+(function homeTask3() {
+    const stream$ = ajax(`https://api.github.com/users`)
+        .pipe(
+            switchMap(r => from(r.response)),
+            skip(10),
+            take(5),
+            map((u: any) => u.login)
+        );
+
+    //run(stream$);
+})();
+
 
 export function runner() { }
